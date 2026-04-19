@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState } from "react";
 import API from "../api/axios";
 import StockForm from "../components/StockForm";
 import StockTable from "../components/StockTable";
@@ -8,10 +8,10 @@ export default function Dashboard() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
 
-  const fetchData = async () => {
-    const res = await API.get(`/stock?search=${search}`);
-    setData(res.data);
-  };
+ const fetchData = useCallback(async () => {
+  const res = await API.get(`/stock?search=${search}`);
+  setData(res.data);
+}, [search]);
 
   useEffect(() => {
     fetchData();
