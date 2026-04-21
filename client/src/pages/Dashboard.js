@@ -7,6 +7,7 @@ import Summary from "../components/Summary";
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
+  const [editData, setEditData] = useState(null); // ✅ NEW
 
   const fetchData = useCallback(async () => {
     try {
@@ -17,7 +18,6 @@ export default function Dashboard() {
     }
   }, [search]);
 
-  // ✅ FIX HERE
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -28,12 +28,25 @@ export default function Dashboard() {
 
       <input
         placeholder="Search Design"
-        className="border p-2 mb-4"
+        className="border p-2 mb-4 w-full rounded"
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <StockForm refresh={fetchData} data={data} />
-      <StockTable data={data} refresh={fetchData} />
+      {/* ✅ Pass edit props */}
+      <StockForm
+        refresh={fetchData}
+        data={data}
+        editData={editData}
+        setEditData={setEditData}
+      />
+
+      {/* ✅ Pass edit handler */}
+      <StockTable
+        data={data}
+        refresh={fetchData}
+        onEdit={setEditData}
+      />
+
       <Summary data={data} />
     </div>
   );

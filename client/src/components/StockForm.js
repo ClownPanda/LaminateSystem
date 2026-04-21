@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import API from "../api/axios";
 
-export default function StockForm({ refresh, data }) {
+export default function StockForm({ refresh, data, editData, setEditData }) {
   const [form, setForm] = useState({
     date: "",
     design: "",
     finish: "SF",
     thickness: "0.62",
     production: 0,
-    dispatch: 0
+    dispatch: 0,
   });
+
+  // ✅ Autofill when editing
+  useEffect(() => {
+    if (editData) {
+      setForm(editData);
+    }
+  }, [editData]);
 
   const calculateOpening = () => {
     const prev = data
@@ -18,7 +25,8 @@ export default function StockForm({ refresh, data }) {
           d.design === form.design &&
           d.finish === form.finish &&
           d.thickness === form.thickness &&
-          d.date < form.date
+          d.date < form.date &&
+          d._id !== editData?._id // ✅ avoid self comparison
       )
       .sort((a, b) => b.date.localeCompare(a.date))[0];
 
@@ -30,45 +38,130 @@ export default function StockForm({ refresh, data }) {
     const closing =
       opening + Number(form.production) - Number(form.dispatch);
 
-    await API.post("/stock", { ...form, opening, closing });
-    refresh();
+    try {
+      if (editData) {
+        // ✅ UPDATE
+        await API.put(`/stock/${editData._id}`, {
+          ...form,
+          opening,
+          closing,
+        });
+        setEditData(null);
+      } else {
+        // ✅ CREATE
+        await API.post("/stock", {
+          ...form,
+          opening,
+          closing,
+        });
+      }
+
+      // reset form
+      setForm({
+        date: "",
+        design: "",
+        finish: "SF",
+        thickness: "0.62",
+        production: 0,
+        dispatch: 0,
+      });
+
+      refresh();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
-    <div className="grid grid-cols-6 gap-2 mb-4">
-      <input type="date" onChange={(e) => setForm({ ...form, date: e.target.value })} />
-      <input placeholder="Design" onChange={(e) => setForm({ ...form, design: e.target.value })} />
+    <div className="bg-white p-4 rounded-xl shadow mb-4">
+      <div className="grid grid-cols-6 gap-3">
+        
+        <input
+          type="date"
+          value={form.date}
+          className="border p-2 rounded"
+          onChange={(e) => setForm({ ...form, date: e.target.value })}
+        />
 
-      <select onChange={(e) => setForm({ ...form, finish: e.target.value })}>
-        <option>SF</option>
-        <option>MT</option>
-        <option>HG</option>
-      </select>
+        <input
+          placeholder="Design"
+          value={form.design}
+          className="border p-2 rounded"
+          onChange={(e) => setForm({ ...form, design: e.target.value })}
+        />
 
-      <select onChange={(e) => setForm({ ...form, thickness: e.target.value })}>
-        <option>0.62</option>
-        <option>0.68</option>
-        <option>0.72</option>
-      </select>
+        <select
+          value={form.finish}
+          className="border p-2 rounded"
+          onChange={(e) => setForm({ ...form, finish: e.target.value })}
+        >
+          <option>SF</option>
+          <option>MT</option>
+          <option>HG</option>
+        </select>
 
-      <input
-        type="number"
-        placeholder="Production"
-        onChange={(e) => setForm({ ...form, production: e.target.value })}
-      />
+        <select
+          value={form.thickness}
+          className="border p-2 rounded"
+          onChange={(e) => setForm({ ...form, thickness: e.target.value })}
+        >
+          <option>0.62</option>
+          <option>0.68</option>
+          <option>0.72</option>
+          <option>0.80</option>
+        </select>
 
-      <input
-        type="number"
-        placeholder="Dispatch"
-        onChange={(e) => setForm({ ...form, dispatch: e.target.value })}
-      />
+        <input
+          type="number"
+          placeholder="Production"
+          value={form.production}
+          className="border p-2 rounded"
+          onChange={(e) =>
+            setForm({ ...form, production: e.target.value })
+          }
+        />
 
-      <button
-        onClick={handleSubmit}
-        className="col-span-6 bg-green-500 text-white p-2"
-      >
-        Save Entry
-      </button>
+        <input
+          type="number"
+          placeholder="Dispatch"
+          value={form.dispatch}
+          className="border p-2 rounded"
+          onChange={(e) =>
+            setForm({ ...form, dispatch: e.target.value })
+          }
+        />
+      </div>
+
+      {/* Buttons */}
+      <div className="flex gap-2 mt-4">
+        <button
+          onClick={handleSubmit}
+          className={`px-4 py-2 rounded text-white ${
+            editData ? "bg-blue-500" : "bg-green-500"
+          }`}
+        >
+          {editData ? "Update Entry" : "Save Entry"}
+        </button>
+
+        {editData && (
+          <button
+            onClick={() => {
+              setEditData(null);
+              setForm({
+                date: "",
+                design: "",
+                finish: "SF",
+                thickness: "0.62",
+                production: 0,
+                dispatch: 0,
+              });
+            }}
+            className="px-4 py-2 rounded bg-gray-400 text-white"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </div>
   );
 }
