@@ -8,7 +8,6 @@ export default function StockTable({ data, refresh, onEdit }) {
     refresh();
   };
 
-  // ✅ Export function
   const exportExcel = () => {
     const formattedData = data.map((d) => ({
       Date: d.date,
@@ -40,7 +39,7 @@ export default function StockTable({ data, refresh, onEdit }) {
   return (
     <div className="mt-6">
 
-      {/* ✅ Export Button */}
+      {/* Export Button */}
       <div className="flex justify-end mb-3">
         <button
           onClick={exportExcel}
@@ -50,54 +49,64 @@ export default function StockTable({ data, refresh, onEdit }) {
         </button>
       </div>
 
-      {/* Header */}
-      <div className="bg-gray-100 rounded-2xl px-6 py-4 shadow-sm mb-2">
-        <div className="grid grid-cols-9 text-sm font-semibold text-gray-700">
-          <span>Date</span>
-          <span>Design</span>
-          <span>Finish</span>
-          <span>Thickness</span>
-          <span>Opening</span>
-          <span>Production</span>
-          <span>Dispatch</span>
-          <span>Closing</span>
-          <span>Action</span>
-        </div>
-      </div>
-
-      {/* Body */}
+      {/* Container */}
       <div className="bg-white rounded-2xl shadow overflow-hidden">
-        {data.map((d) => (
-          <div
-            key={d._id}
-            className="grid grid-cols-9 px-6 py-4 border-b items-center hover:bg-gray-50"
-          >
-            <span>{d.date}</span>
-            <span>{d.design}</span>
-            <span>{d.finish}</span>
-            <span>{d.thickness}</span>
-            <span>{d.opening}</span>
-            <span>{d.production}</span>
-            <span>{d.dispatch}</span>
-            <span className="font-semibold">{d.closing}</span>
 
-            <span className="flex gap-2">
-              <button
-                onClick={() => onEdit(d)}
-                className="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm hover:bg-blue-200"
-              >
-                Edit
-              </button>
+        {/* Scroll Area */}
+        <div className="max-h-[400px] overflow-y-auto">
 
-              <button
-                onClick={() => handleDelete(d._id)}
-                className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm hover:bg-red-200"
-              >
-                Delete
-              </button>
-            </span>
+          {/* Sticky Header */}
+          <div className="bg-gray-100 px-6 py-4 sticky top-0 z-10">
+            <div className="grid grid-cols-9 text-sm font-semibold text-gray-700">
+              <span>Date</span>
+              <span>Design</span>
+              <span>Finish</span>
+              <span>Thickness</span>
+              <span>Opening</span>
+              <span>Production</span>
+              <span>Dispatch</span>
+              <span>Closing</span>
+              <span>Action</span>
+            </div>
           </div>
-        ))}
+
+          {/* Body */}
+          {data.length === 0 ? (
+            <p className="p-6 text-gray-500 text-center">No data found</p>
+          ) : (
+            data.map((d) => (
+              <div
+                key={d._id}
+                className="grid grid-cols-9 px-6 py-4 border-b items-center hover:bg-gray-50"
+              >
+                <span>{d.date}</span>
+                <span>{d.design}</span>
+                <span>{d.finish}</span>
+                <span>{d.thickness}</span>
+                <span>{d.opening}</span>
+                <span>{d.production}</span>
+                <span>{d.dispatch}</span>
+                <span className="font-semibold">{d.closing}</span>
+
+                <span className="flex gap-2">
+                  <button
+                    onClick={() => onEdit(d)}
+                    className="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-sm hover:bg-blue-200"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    onClick={() => handleDelete(d._id)}
+                    className="bg-red-100 text-red-600 px-3 py-1 rounded-lg text-sm hover:bg-red-200"
+                  >
+                    Delete
+                  </button>
+                </span>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
