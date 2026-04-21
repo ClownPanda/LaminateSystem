@@ -7,7 +7,7 @@ import Summary from "../components/Summary";
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
-  const [editData, setEditData] = useState(null); // ✅ NEW
+  const [editData, setEditData] = useState(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -19,12 +19,18 @@ export default function Dashboard() {
   }, [search]);
 
   useEffect(() => {
-    fetchData();
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/";
+    } else {
+      fetchData();
+    }
   }, [fetchData]);
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl mb-4">Stock Dashboard</h1>
+      <h1 className="text-2xl mb-4 font-bold">Stock Dashboard</h1>
 
       <input
         placeholder="Search Design"
@@ -32,7 +38,6 @@ export default function Dashboard() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* ✅ Pass edit props */}
       <StockForm
         refresh={fetchData}
         data={data}
@@ -40,7 +45,6 @@ export default function Dashboard() {
         setEditData={setEditData}
       />
 
-      {/* ✅ Pass edit handler */}
       <StockTable
         data={data}
         refresh={fetchData}

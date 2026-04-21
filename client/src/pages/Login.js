@@ -2,33 +2,57 @@ import { useState } from "react";
 import API from "../api/axios";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const login = async () => {
-    const res = await API.post("/auth/login", { email, password });
+ const login = async () => {
+  try {
+    console.log("📤 Sending to backend:", {
+      username,
+      password,
+    });
+
+    const res = await API.post("/auth/login", {
+      username,
+      password,
+    });
+
+    console.log("✅ LOGIN SUCCESS:", res.data);
+
     localStorage.setItem("token", res.data.token);
-    window.location = "/dashboard";
-  };
+    localStorage.setItem("username", res.data.username);
+
+    window.location.href = "/dashboard";
+
+  } catch (err) {
+    console.log("❌ LOGIN ERROR RESPONSE:", err.response?.data);
+    alert("Invalid credentials");
+  }
+};
 
   return (
-    <div className="flex h-screen items-center justify-center">
-      <div className="p-6 bg-white shadow rounded">
-        <h2 className="text-xl mb-4">Login</h2>
+    <div className="flex h-screen items-center justify-center bg-gray-100">
+      <div className="p-6 bg-white shadow rounded-2xl w-80">
+        <h2 className="text-xl mb-4 font-bold text-center">Login</h2>
+
         <input
-          className="border p-2 mb-2 w-full"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
+          className="border p-2 mb-3 w-full rounded"
+          placeholder="Username"
+           value={username}  
+          onChange={(e) => setUsername(e.target.value)}
         />
+
         <input
-          className="border p-2 mb-2 w-full"
+          className="border p-2 mb-4 w-full rounded"
           placeholder="Password"
           type="password"
+          value={password} 
           onChange={(e) => setPassword(e.target.value)}
         />
+
         <button
           onClick={login}
-          className="bg-blue-500 text-white px-4 py-2 w-full"
+          className="bg-blue-500 text-white px-4 py-2 w-full rounded hover:bg-blue-600"
         >
           Login
         </button>
