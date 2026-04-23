@@ -46,7 +46,6 @@ const logout = () => {
     Logout
   </button>
 </div>
-      <h1 className="text-2xl mb-4 font-bold">Stock Dashboard</h1>
 
       <input
         placeholder="Search Design"
