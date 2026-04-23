@@ -2,21 +2,22 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
 export default function Summary({ data }) {
-  const summary = {};
 
-  data.forEach((item) => {
-    const key = `${item.design}-${item.finish}-${item.thickness}`;
+const summary = {};
 
-    if (
-      !summary[key] ||
-      new Date(item.date) > new Date(summary[key].date)
-    ) {
-      summary[key] = {
-        closing: item.closing,
-        date: item.date,
-      };
-    }
-  });
+data.forEach((item) => {
+  const key = `${item.design}-${item.finish}-${item.thickness}`;
+
+  if (
+    !summary[key] ||
+    new Date(item.createdAt) > new Date(summary[key].createdAt)
+  ) {
+    summary[key] = {
+      closing: item.closing,
+      createdAt: item.createdAt,
+    };
+  }
+});
 
   // ✅ Export function
   const exportSummary = () => {
