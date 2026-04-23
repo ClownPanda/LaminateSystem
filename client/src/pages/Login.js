@@ -1,34 +1,31 @@
 import { useState } from "react";
 import API from "../api/axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
- const login = async () => {
-  try {
-    console.log("📤 Sending to backend:", {
-      username,
-      password,
-    });
+  const login = async () => {
+    try {
+      const res = await API.post("/auth/login", {
+        username,
+        password,
+      });
 
-    const res = await API.post("/auth/login", {
-      username,
-      password,
-    });
+      // ✅ Save token + username
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("username", res.data.username);
 
-    console.log("✅ LOGIN SUCCESS:", res.data);
+      // ✅ Redirect properly (React way)
+      navigate("/dashboard");
 
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("username", res.data.username);
-
-    window.location.href = "/dashboard";
-
-  } catch (err) {
-    console.log("❌ LOGIN ERROR RESPONSE:", err.response?.data);
-    alert("Invalid credentials");
-  }
-};
+    } catch (err) {
+      console.log(err.response?.data);
+      alert("Invalid username or password");
+    }
+  };
 
   return (
     <div className="flex h-screen items-center justify-center bg-gray-100">
@@ -38,7 +35,7 @@ export default function Login() {
         <input
           className="border p-2 mb-3 w-full rounded"
           placeholder="Username"
-           value={username}  
+          value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
 
@@ -46,7 +43,7 @@ export default function Login() {
           className="border p-2 mb-4 w-full rounded"
           placeholder="Password"
           type="password"
-          value={password} 
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 

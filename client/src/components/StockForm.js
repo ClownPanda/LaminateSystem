@@ -18,19 +18,31 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
     }
   }, [editData]);
 
+  // ✅ FIXED: Correct opening calculation (handles SAME DAY entries)
   const calculateOpening = () => {
-    const prev = data
-      .filter(
-        (d) =>
-          d.design === form.design &&
-          d.finish === form.finish &&
-          d.thickness === form.thickness &&
-          d.date < form.date &&
-          d._id !== editData?._id // ✅ avoid self comparison
-      )
-      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    const filtered = data.filter(
+      (d) =>
+        d.design === form.design &&
+        d.finish === form.finish &&
+        d.thickness === form.thickness &&
+        d._id !== editData?._id // avoid self when editing
+    );
 
-    return prev ? prev.closing : 0;
+    if (filtered.length === 0) return 0;
+
+    // ✅ Sort by date + latest entry (same day included)
+    const latest = filtered.sort((a, b) => {
+      const dateDiff = new Date(b.date) - new Date(a.date);
+
+      if (dateDiff === 0) {
+        // same date → pick latest created entry
+        return new Date(b._id) - new Date(a._id);
+      }
+
+      return dateDiff;
+    })[0];
+
+    return latest.closing;
   };
 
   const handleSubmit = async () => {
@@ -56,7 +68,7 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
         });
       }
 
-      // reset form
+      // ✅ Reset form
       setForm({
         date: "",
         design: "",

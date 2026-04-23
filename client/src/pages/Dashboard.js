@@ -9,6 +9,12 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [editData, setEditData] = useState(null);
 
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  window.location.href = "/";
+};
+
   const fetchData = useCallback(async () => {
     try {
       const res = await API.get(`/stock?search=${search}`);
@@ -30,6 +36,16 @@ export default function Dashboard() {
 
   return (
     <div className="p-6">
+    <div className="flex justify-between items-center mb-4">
+  <h1 className="text-2xl font-bold">Stock Dashboard</h1>
+
+  <button
+    onClick={logout}
+    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+  >
+    Logout
+  </button>
+</div>
       <h1 className="text-2xl mb-4 font-bold">Stock Dashboard</h1>
 
       <input
