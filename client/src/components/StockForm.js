@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import API from "../api/axios";
 
 export default function StockForm({ refresh, data, editData, setEditData }) {
+  const username = localStorage.getItem("username"); // ✅ get logged-in user
+
   const [form, setForm] = useState({
     date: "",
     design: "",
     finish: "SF",
-    thickness: "0.62",
+    thickness: username === "Arihant0.8" ? "0.8" : "0.62", // ✅ conditional
     production: 0,
     dispatch: 0,
   });
@@ -18,24 +20,21 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
     }
   }, [editData]);
 
-  // ✅ FIXED: Correct opening calculation (handles SAME DAY entries)
+  // ✅ Opening calculation (same-day chain fixed)
   const calculateOpening = () => {
-  const prev = data
-    .filter(
-      (d) =>
-        d.design === form.design &&
-        d.finish === form.finish &&
-        d.thickness === form.thickness &&
-        (
-          d.date < form.date ||
-          d.date === form.date
-        ) &&
-        d._id !== editData?._id
-    )
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+    const prev = data
+      .filter(
+        (d) =>
+          d.design === form.design &&
+          d.finish === form.finish &&
+          d.thickness === form.thickness &&
+          (d.date < form.date || d.date === form.date) &&
+          d._id !== editData?._id
+      )
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
 
-  return prev ? prev.closing : 0;
-};
+    return prev ? prev.closing : 0;
+  };
 
   const handleSubmit = async () => {
     const opening = calculateOpening();
@@ -44,7 +43,6 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
 
     try {
       if (editData) {
-        // ✅ UPDATE
         await API.put(`/stock/${editData._id}`, {
           ...form,
           opening,
@@ -52,7 +50,6 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
         });
         setEditData(null);
       } else {
-        // ✅ CREATE
         await API.post("/stock", {
           ...form,
           opening,
@@ -65,7 +62,7 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
         date: "",
         design: "",
         finish: "SF",
-        thickness: "0.62",
+        thickness: username === "Arihant0.8" ? "0.8" : "0.62",
         production: 0,
         dispatch: 0,
       });
@@ -73,6 +70,7 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
       refresh();
     } catch (err) {
       console.error(err);
+      alert(err.response?.data?.msg || "Error saving entry");
     }
   };
 
@@ -94,25 +92,50 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
           onChange={(e) => setForm({ ...form, design: e.target.value })}
         />
 
+        {/* ✅ FINISH */}
         <select
           value={form.finish}
           className="border p-2 rounded"
           onChange={(e) => setForm({ ...form, finish: e.target.value })}
         >
-          <option>SF</option>
-          <option>MT</option>
-          <option>HG</option>
+          {username === "Arihant0.8" ? (
+            <>
+              <option>SF</option>
+              <option>MT</option>
+              <option>HG</option>
+              <option>SW</option>
+              <option>FM</option>
+              <option>VL</option>
+              <option>VO</option>
+              <option>FL</option>
+              <option>SMT</option>
+              <option>CS</option>
+            </>
+          ) : (
+            <>
+              <option>SF</option>
+              <option>MT</option>
+              <option>HG</option>
+            </>
+          )}
         </select>
 
+        {/* ✅ THICKNESS */}
         <select
           value={form.thickness}
           className="border p-2 rounded"
           onChange={(e) => setForm({ ...form, thickness: e.target.value })}
         >
-          <option>0.62</option>
-          <option>0.68</option>
-          <option>0.72</option>
-          <option>0.80</option>
+          {username === "Arihant0.8" ? (
+            <option value="0.8">0.8</option>
+          ) : (
+            <>
+              <option>0.62</option>
+              <option>0.68</option>
+              <option>0.72</option>
+              <option>0.80</option>
+            </>
+          )}
         </select>
 
         <input
@@ -155,7 +178,7 @@ export default function StockForm({ refresh, data, editData, setEditData }) {
                 date: "",
                 design: "",
                 finish: "SF",
-                thickness: "0.62",
+                thickness: username === "Arihant0.8" ? "0.8" : "0.62",
                 production: 0,
                 dispatch: 0,
               });
